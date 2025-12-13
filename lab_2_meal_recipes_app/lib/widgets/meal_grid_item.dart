@@ -4,11 +4,15 @@ import '../models/meal.dart';
 class MealGridItem extends StatelessWidget {
   final MealSummary meal;
   final VoidCallback onTap;
+  final bool isFavorite;
+  final VoidCallback onToggleFavorite;
 
   const MealGridItem({
     super.key,
     required this.meal,
     required this.onTap,
+    required this.isFavorite,
+    required this.onToggleFavorite,
   });
 
   @override
@@ -21,9 +25,27 @@ class MealGridItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Image.network(
-                meal.thumbnail,
-                fit: BoxFit.cover,
+              child: Stack(
+                children: [
+                  Image.network(
+                    meal.thumbnail,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: IconButton(
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.white,
+                      ),
+                      onPressed: onToggleFavorite,
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(

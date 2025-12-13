@@ -3,6 +3,9 @@ import '../models/meal.dart';
 import '../services/meal_api_service.dart';
 import '../widgets/meal_grid_item.dart';
 import 'meal_detail_screen.dart';
+import '../services/favorites_service.dart';
+
+
 
 class MealsByCategoryScreen extends StatefulWidget {
   final String categoryName;
@@ -18,14 +21,24 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<MealSummary> _allMeals = [];
   List<MealSummary> _filteredMeals = [];
+  Set<String> _favoriteIds = {};
+
 
   @override
   void initState() {
     super.initState();
     _futureMeals = MealApiService.fetchMealsByCategory(widget.categoryName);
     load();
+    loadFavorites();
     _searchController.addListener(search);
   }
+  void loadFavorites() async {
+    final favs = await FavoritesService.getFavorites();
+    setState(() {
+      _favoriteIds = favs;
+    });
+  }
+
 
   void load() async {
     final meals = await _futureMeals;
@@ -79,6 +92,11 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
                     final meal = _filteredMeals[i];
                     return MealGridItem(
                       meal: meal,
+                      isFavorite: _favoriteIds.contains(meal.id),
+                      onToggleFavorite: () async {
+                        await FavoritesService.toggleFavorite(meal.id);
+                        loadFavorites();
+                      },
                       onTap: () {
                         Navigator.push(
                           context,
@@ -88,6 +106,7 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
                         );
                       },
                     );
+
                   },
                 );
               },

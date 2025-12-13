@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../models/meal.dart';
 import '../services/meal_api_service.dart';
+import '../services/notification_service.dart';
 import '../widgets/category_card.dart';
 import 'meals_by_category_screen.dart';
 import 'meal_detail_screen.dart';
+import 'favorites_screen.dart';
+
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -25,6 +28,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     _futureCategories = MealApiService.fetchCategories();
     _load();
     _searchController.addListener(_onSearchChanged);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NotificationService.init();
+      await NotificationService.scheduleDailyRandomRecipe();
+    });
   }
 
   void _load() async {
@@ -58,7 +66,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Meal Categories")),
+      appBar: AppBar(
+        title: const Text("Meal Categories"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FavoritesScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
